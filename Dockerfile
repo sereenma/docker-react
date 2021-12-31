@@ -1,0 +1,20 @@
+#first block - build phase
+#Specify a base image 
+FROM node:16-alpine as builder
+
+WORKDIR /app/
+
+# Install package.json which is needed for npm install - no change in package.json so the npm install won't be rebuild again
+COPY ./package.json ./
+RUN npm install
+
+#here a change will be detected(in index.js)
+COPY ./ ./
+
+RUN npm run build
+
+
+#second block - run phase
+FROM nginx
+
+COPY --from=builder /app/build /usr/share/nginx/html
